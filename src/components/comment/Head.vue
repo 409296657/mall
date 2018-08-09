@@ -3,20 +3,24 @@
     <div class="headbar">
         <div class="container flex-box">
             <img src="@/images/logo.jpg" alt="">
-            <span>登录</span>
+            <span><Login></Login></span>
         </div>
     </div>
   </div>
 </template>
 
 <script>
+import Login from '@/components/comment/login'
 export default {
-  name: 'Head',
-  data () {
-    return {
+    name: 'Head',
+    components:{
+        Login,
+    },
+    data () {
+        return {
       
+        }
     }
-  }
 }
 </script>
 

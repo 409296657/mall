@@ -12,7 +12,7 @@
     <div class="content">
         <div class="condition container">
             <p>
-                排序：<span>默认</span><span>价格</span><span class="sort">↑</span>
+                排序：<span>默认</span><span @click="sorting">价格</span><span class="sort" :class="{active:!isUp}">↑</span>
             </p>
         </div>
 
@@ -48,6 +48,7 @@ export default {
     },
     data () {
         return {
+            isUp:true,
             isLoading:true,
             goodsList:[],
             page:0,
@@ -62,6 +63,37 @@ export default {
         }
     },
     methods:{
+        sorting:function(){
+            function sortUp(type){
+                return function(obj1,obj2){
+                    if(obj1[type]<obj2[type]){
+                        return -1;
+                    }else if(obj1[type]===obj2[type]){
+                        return 0;
+                    }else{
+                        return 1;
+                    }
+                };
+            };
+            function sortDown(type){
+                return function(obj1,obj2){
+                    if(obj1[type]<obj2[type]){
+                        return 1;
+                    }else if(obj1[type]===obj2[type]){
+                        return 0;
+                    }else{
+                        return -1;
+                    }
+                };
+            };
+            if(this.isUp){
+                this.goodsList.sort(sortDown('productPrice'))
+                this.isUp = !this.isUp
+            }else{
+                this.goodsList.sort(sortUp('productPrice'))
+                this.isUp = !this.isUp
+            }
+        },
         scroll:function(){
             let bottomOfWindow = document.documentElement.offsetHeight - document.documentElement.scrollTop - window.innerHeight;
             if (bottomOfWindow <= 0 && this.isLoading == false){
@@ -87,6 +119,7 @@ export default {
         },
         selectPrice:function(item,index){
             this.page = 0;
+            this.isUp = true;
             let data = {
                 price:item.id,
             }
@@ -178,6 +211,9 @@ export default {
                     margin:0 10px;
                     transition: .3s;
                     display: inline-block;
+                    &.active{
+                        transform: rotate(180deg);
+                    }
                 }
             }
         }
