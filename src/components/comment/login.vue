@@ -9,7 +9,7 @@
       :lock-scroll="false"
       center>
       <form class="">
-        <input type="text" name="" placeholder="请输入手机号码" v-model="mobile">
+        <input type="text" name="" placeholder="请输入账号" v-model="mobile">
         <input type="password" name="" placeholder="请输入密码" v-model="psw">
         <div class="check"><span>7天内自动登陆  </span><el-checkbox v-model="save"></el-checkbox></div>
         <el-button type="primary" @click="login">登 录</el-button>
@@ -36,34 +36,34 @@ export default {
   methods:{
     login(){
       this.axios({
-        method:"POST",
-        url:"http://www.ftusix.com/static/data/login.php",
+        method:'POST',
+        url:'/api/users/login',
         data:{
-          "mobile":this.mobile,
-          "pwd":this.psw,
+          'userName':this.mobile,
+          'userPwd':this.psw,
         }
       })
       .then((res)=>{
         console.log(res)
-        if(res.data.status==1){
+        if(res.data.status==0){
           if (this.save) {
             this.centerDialogVisibleLogin = false
-            let userData = res.data.data[0];
+            let userData = res.data.result.userName;
             this.common.setCookie('useInfo',userData,'7')
             this.$emit("logining",[true,this.common.getCookie('useInfo')])
           }else{
             this.centerDialogVisibleLogin = false
-            let userData = res.data.data[0];
+            let userData = res.data.result.userName;
             sessionStorage.setItem("user",JSON.stringify(userData));
             let user =JSON.parse(sessionStorage.getItem("user"));
             this.$emit("logining",[true,user])
           }
 
         }else{
-          alert(res.data.info)
+          alert('用户名或密码错误')
         }
       })
-      .catch(function(err){
+      .catch((err)=>{
 
       })
     }

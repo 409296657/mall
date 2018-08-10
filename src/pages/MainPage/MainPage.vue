@@ -1,6 +1,6 @@
 <template>
   <div id="MainPage">
-    <Head></Head>
+    <Head :num="num"></Head>
 
     <div class="status">
         <div class="container">
@@ -28,7 +28,7 @@
                         <img :src="require(`@/images/${item.productImg}`)">
                         <p>{{item.productName}}</p>
                         <span>￥{{item.productPrice}}.00</span>
-                        <div class="btn" @click.prevent="addShoppingCar">
+                        <div class="btn" @click.prevent="addShoppingCar(item)">
                             加入购物车
                         </div>
                     </div>
@@ -48,6 +48,8 @@ export default {
     },
     data () {
         return {
+            userId:'',
+            num:'',
             isUp:true,
             isLoading:true,
             goodsList:[],
@@ -63,6 +65,22 @@ export default {
         }
     },
     methods:{
+        shoppingCar:function(){
+            this.axios({
+                method:'GET',
+                url:'/api/users/carlist',
+                params:{
+                    userId:this.userId
+                }
+            })
+            .then((res)=>{
+                console.log(res)
+                this.num = res.data.result.length
+            })
+            .catch((err)=>{
+
+            })
+        },
         sorting:function(){
             function sortUp(type){
                 return function(obj1,obj2){
@@ -110,7 +128,6 @@ export default {
                 })
                 .then((res)=>{
                     this.page++;
-                    console.log(res.data)
                     let goods = res.data;
                     this.goodsList = this.goodsList.concat(goods)
                     this.isLoading = false
@@ -126,8 +143,26 @@ export default {
             this.$router.push({path:'/',query:data})
             console.log(this.$route.query.price)
         },
-        addShoppingCar:function(){
-            console.log("11111")
+        addShoppingCar:function(data){
+            if(this.userId){
+                this.axios({
+                    method:'POST',
+                    url:'/api/goods/addCar',
+                    data:{
+                        productId:data.productId,
+                        userId:this.userId
+                    }
+                })
+                .then((res)=>{
+                    console.log(res)
+                    this.shoppingCar()
+                })
+                .catch((err)=>{
+                    console.log(err)
+                })
+            }else{
+                alert('请登陆后操作')
+            }
         },
         init:function(){
             this.axios({
@@ -141,8 +176,8 @@ export default {
                 }
             })
             .then((res)=>{
+                console.log(res)
                 this.page++;
-                console.log(res.data)
                 let goods = res.data;
                 this.goodsList = this.goodsList.concat(goods);
                 this.isLoading = false;
@@ -155,6 +190,14 @@ export default {
     mounted(){
         this.init()
         window.addEventListener("scroll", this.scroll)
+        if(this.common.getCookie('useInfo')){
+            this.userId=this.common.getCookie('useInfo');
+            this.shoppingCar()
+        }else if (sessionStorage.getItem("user")) {
+            let user =JSON.parse(sessionStorage.getItem("user"));
+            this.userId = user;
+            this.shoppingCar()
+        }
     },
     watch:{
         '$route' (to,from){
