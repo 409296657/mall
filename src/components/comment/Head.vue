@@ -6,6 +6,7 @@
             <div class="unlogin" v-if="!land"><Login v-on:logining="change"></Login></div>
             <div class="user" v-else>
                 <b>{{userId}}</b>&nbsp;&nbsp;
+                {{$store.state.userId}}
                 <span @click="quit">退出</span>&nbsp;&nbsp;
                 <el-badge :value="num" class="item">
                     <i class="iconfont icon-gouwuche"></i>
@@ -18,6 +19,7 @@
 
 <script>
 import Login from '@/components/comment/login'
+import store from '@/store/index'
 export default {
     name: 'Head',
     components:{
