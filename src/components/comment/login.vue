@@ -22,6 +22,8 @@
 </template>
 
 <script>
+import store from '@/vuex/store'
+import { mapMutations } from 'vuex'
 export default {
   name:'login',
   data(){
@@ -33,7 +35,9 @@ export default {
       centerDialogVisibleLogin: false,
     }
   },
+  store,
   methods:{
+    ...mapMutations(['isLogin','shoppingCar']),
     login(){
       this.axios({
         method:'POST',
@@ -50,15 +54,14 @@ export default {
             this.centerDialogVisibleLogin = false
             let userData = res.data.result.userName;
             this.common.setCookie('useInfo',userData,'7')
-            this.$emit("logining",[true,this.common.getCookie('useInfo')])
           }else{
             this.centerDialogVisibleLogin = false
             let userData = res.data.result.userName;
             sessionStorage.setItem("user",JSON.stringify(userData));
             let user =JSON.parse(sessionStorage.getItem("user"));
-            this.$emit("logining",[true,user])
           }
-
+          this.isLogin()
+          // this.shoppingCar()
         }else{
           alert('用户名或密码错误')
         }

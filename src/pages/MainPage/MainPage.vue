@@ -1,6 +1,6 @@
 <template>
   <div id="MainPage">
-    <Head :num="num"></Head>
+    <Head></Head>
 
     <div class="status">
         <div class="container">
@@ -41,15 +41,16 @@
 
 <script>
 import Head from '@/components/comment/Head'
+import store from '@/vuex/store'
+import { mapState, mapMutations } from 'vuex'
 export default {
     name: 'MainPage',
     components:{
         Head
     },
+    store,
     data () {
         return {
-            userId:'',
-            num:'',
             isUp:true,
             isLoading:true,
             goodsList:[],
@@ -65,22 +66,7 @@ export default {
         }
     },
     methods:{
-        shoppingCar:function(){
-            this.axios({
-                method:'GET',
-                url:'/api/users/carlist',
-                params:{
-                    userId:this.userId
-                }
-            })
-            .then((res)=>{
-                console.log(res)
-                this.num = res.data.result.length
-            })
-            .catch((err)=>{
-
-            })
-        },
+        ...mapMutations(['shoppingCar']),
         sorting:function(){
             function sortUp(type){
                 return function(obj1,obj2){
@@ -141,7 +127,6 @@ export default {
                 price:item.id,
             }
             this.$router.push({path:'/',query:data})
-            console.log(this.$route.query.price)
         },
         addShoppingCar:function(data){
             if(this.userId){
@@ -155,7 +140,7 @@ export default {
                 })
                 .then((res)=>{
                     console.log(res)
-                    this.shoppingCar()
+                    this.shoppingCar(this.userId)
                 })
                 .catch((err)=>{
                     console.log(err)
@@ -176,7 +161,6 @@ export default {
                 }
             })
             .then((res)=>{
-                console.log(res)
                 this.page++;
                 let goods = res.data;
                 this.goodsList = this.goodsList.concat(goods);
@@ -187,17 +171,12 @@ export default {
             })
         }
     },
+    computed: {
+        ...mapState(['userId']),
+    },
     mounted(){
         this.init()
         window.addEventListener("scroll", this.scroll)
-        if(this.common.getCookie('useInfo')){
-            this.userId=this.common.getCookie('useInfo');
-            this.shoppingCar()
-        }else if (sessionStorage.getItem("user")) {
-            let user =JSON.parse(sessionStorage.getItem("user"));
-            this.userId = user;
-            this.shoppingCar()
-        }
     },
     watch:{
         '$route' (to,from){

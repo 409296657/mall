@@ -7,7 +7,6 @@ import App from './App'
 import router from './router'
 import axios from 'axios'
 import common from '@/utils/common'
-import store from './store'
 
 Vue.use(ElementUI)
 
@@ -20,7 +19,6 @@ new Vue({
   el: '#app',
   render: h => h(App),
   router,
-  store,
   components: { App },
   template: '<App/>'
 })
