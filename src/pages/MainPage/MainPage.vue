@@ -2,6 +2,18 @@
   <div id="MainPage">
     <Head></Head>
 
+    <div class="shadow" v-show="car">
+        <div class="flex-box">
+            <div class="card">
+                <p>加入购物车成功</p>
+                <div class="btn-box">
+                    <div class="btn" @click="car=''">继续购物</div>
+                    <router-link :to="{path:'/car'}"><div class="btn">查看购物车</div></router-link>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="status">
         <div class="container">
             <router-link :to="{path:''}">主页</router-link>/
@@ -27,7 +39,7 @@
                     <div class="goodsBox">
                         <img :src="require(`@/images/${item.productImg}`)">
                         <p>{{item.productName}}</p>
-                        <span>￥{{item.productPrice}}.00</span>
+                        <span>{{item.productPrice|toPrice}}</span>
                         <div class="btn" @click.prevent="addShoppingCar(item)">
                             加入购物车
                         </div>
@@ -51,6 +63,7 @@ export default {
     store,
     data () {
         return {
+            car:'',
             isUp:true,
             isLoading:true,
             goodsList:[],
@@ -141,6 +154,7 @@ export default {
                 .then((res)=>{
                     console.log(res)
                     this.shoppingCar(this.userId)
+                    this.car = 1;
                 })
                 .catch((err)=>{
                     console.log(err)
@@ -191,7 +205,47 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="less">
 #MainPage{
+    
+    .shadow{
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, .7);
+        z-index: 999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .flex-box{
+            justify-content: center;
+            align-items: center;
+            width: 500px;
+            height: 300px;
+            background-color: #fff;
+            .card{
 
+                p{
+                    font-size: 24px;
+                    text-align: center;
+                }
+                .btn-box{
+                    display: flex;
+                    .btn{
+                        width: 150px;
+                        height: 40px;
+                        margin: 10px 20px;
+                        background-color: #1e90ff;
+                        color: #fff;
+                        font-size: 18px;
+                        line-height: 40px;
+                        text-align: center;
+                        cursor: pointer;
+                    }
+                }
+            }
+        }
+    }
     .headbar{
         background-color: #fff;
         .container{

@@ -61,7 +61,6 @@ export default {
             let user =JSON.parse(sessionStorage.getItem("user"));
           }
           this.isLogin()
-          // this.shoppingCar()
         }else{
           alert('用户名或密码错误')
         }

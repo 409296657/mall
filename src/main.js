@@ -7,12 +7,17 @@ import App from './App'
 import router from './router'
 import axios from 'axios'
 import common from '@/utils/common'
+import filter from '@/utils/filter'
 
 Vue.use(ElementUI)
 
 Vue.prototype.axios = axios
 Vue.prototype.common = common
 Vue.config.productionTip = false
+
+for(let key in filter){
+  Vue.filter(key,filter[key])
+}
 
 /* eslint-disable no-new */
 new Vue({

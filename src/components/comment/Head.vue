@@ -8,7 +8,7 @@
                 <b>{{userId}}</b>&nbsp;&nbsp;
                 <span @click="quit">退出</span>&nbsp;&nbsp;
                 <el-badge :value="num" class="item">
-                    <i class="iconfont icon-gouwuche"></i>
+                    <router-link :to="{path:'/car'}"><i class="iconfont icon-gouwuche"></i></router-link>
                 </el-badge>
             </div>
         </div>
@@ -44,10 +44,8 @@ export default {
     mounted() {
         if(this.common.getCookie('useInfo')){
             this.isLogin()
-            // this.shoppingCar(this.userId)
         }else if (sessionStorage.getItem("user")) {
             this.isLogin()
-            // this.shoppingCar(this.userId)
         }
     },
 }
