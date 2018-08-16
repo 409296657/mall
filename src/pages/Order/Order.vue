@@ -1,31 +1,27 @@
 <template>
-  <div id="ShoppingCar">
+  <div id="Order">
     <Head></Head>
 
     <div class="status">
         <div class="container">
             <router-link :to="{path:'/'}">主页</router-link>/
-            <router-link :to="{path:''}">购物车</router-link>
+            <router-link :to="{path:''}">订单确认</router-link>
         </div>
     </div>
 
     <div class="content">
         <div class="container">
-            <p>购物车</p>
+            <p>订单详情</p>
             <div class="goodList">
                 <div class="titleBar">
                     <span>商品</span>
                     <span>价格</span>
                     <span>数量</span>
                     <span>总价</span>
-                    <span>编辑</span>
                 </div>
                 <div class="goods">
                     <div class="good flex-box" v-for="item in goodsList" :key="item.Id">
                         <div class="commodity flex-box item-box">
-                            <div class="select" @click="select(item)">
-                                <img v-show="item.checked" src="@/images/finish.png" alt="">
-                            </div>
                             <div class="pic">
                                 <img :src="require(`@/images/${item.productImage}`)" alt="">
                             </div>
@@ -35,33 +31,40 @@
                             {{item.salePrice|toPrice}}
                         </div>
                         <div class="num item-box">
-                            <el-input-number v-model="item.productNum" size="small" :min="1" @change="handleChange(item)"></el-input-number>
+                            {{item.productNum}}
                         </div>
                         <div class="totalPrice item-box">
                             {{item.productNum*item.salePrice|toPrice}}
                         </div>
-                        <div class="edit item-box">
-                            <i class="iconfont icon-lajitong" @click="delect(item.productId)"></i>
-                        </div>
                     </div>
                 </div>
-                <div class="all flex-box">
-                    <div class="left flex-box">
-                        <div class="select flex-box">
-                            <div class="circle" @click="allSelect">
-                                <img src="@/images/finish.png" alt="" v-show="all">
-                            </div>
-                            <span>全部</span>
-                        </div>
-                        <div class="price">
-                            合计: <span>{{totalPrice|toPrice}}</span>
-                        </div>
+
+                <div class="flex-box settlement">
+                    <div class="money">
+                        <p>{{totalPrice|toPrice}}</p>
+                        <p>{{freight|toPrice}}</p>
+                        <p>{{discount|toPrice}}</p>
+                        <p>{{total|toPrice}}</p>
                     </div>
-                    <router-link :to="{path:'/order'}">
+                    <div class="describe">
+                        <p>商品总价:</p>
+                        <p>快递费:</p>
+                        <p>折扣:</p>
+                        <p>合计:</p>
+                    </div>
+                </div>
+
+                <div class="all flex-box">
+                    <router-link :to="{path:'/car'}">
                         <div class="right">
-                            去结算
+                            上一步
                         </div>
                     </router-link>
+
+                    <div class="right" @click="confirm">
+                        确认支付
+                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -74,87 +77,31 @@
 <script>
 import Head from '@/components/comment/Head'
 import store from '@/vuex/store'
-import { mapState, mapMutations } from 'vuex'
+import { mapState } from 'vuex'
 export default {
-    name: 'ShoppingCar',
+    name: 'Order',
     components:{
         Head
     },
     store,
     data () {
         return {
+            freight:10,
+            discount:200,
             goodsList:[],
-            isLoad:true,
         }
     },
     methods:{
-        ...mapMutations(['shoppingCar']),
-        allSelect:function(){
-            this.axios({
-                method:'POST',
-                url:'/api/users/carCheckAll',
-                data:{
-                    userId:this.userId,
-                    checked:this.all?0:1,
+        confirm:function(){
+            let orderId = new Date().getTime();
+            this.$router.push({
+                name:'OrderSuccess',
+                params:{
+                    price:this.total
+                },
+                query:{
+                    orderId:orderId
                 }
-            })
-            .then((res)=>{
-                this.init()
-            })
-            .catch((err)=>{
-            })
-        },
-        handleChange:function(data){
-            this.axios({
-                method:'POST',
-                url:'/api/users/carEdit',
-                data:{
-                    Id:data.Id,
-                    productNum:data.productNum,
-                    checked:data.checked
-                }
-            })
-            .then((res)=>{
-                
-            })
-            .catch((err)=>{
-            })
-        },
-        select:function(data){
-            if(this.isLoad){
-                this.isLoad = false
-                this.axios({
-                    method:'POST',
-                    url:'/api/users/carEdit',
-                    data:{
-                        Id:data.Id,
-                        productNum:data.productNum,
-                        checked:data.checked == 0?1:0
-                    }
-                })
-                .then((res)=>{
-                    this.init();
-                    this.isLoad = true;
-                })
-                .catch((err)=>{
-                })
-            }
-        },
-        delect:function(data){
-            this.axios({
-                method:'POST',
-                url:'/api/users/carDel',
-                data:{
-                    userId:this.userId,
-                    productId:data
-                }
-            })
-            .then((res)=>{
-                this.goodsList = []
-                this.shoppingCar()
-                this.init()
-            })
-            .catch((err)=>{
             })
         },
         init:function(){
@@ -166,7 +113,9 @@ export default {
                 }
             })
             .then((res)=>{
-                this.goodsList = res.data.result;
+                this.goodsList = res.data.result.filter((item)=>{
+                    return item.checked == 1
+                })
             })
             .catch((err)=>{
 
@@ -175,6 +124,9 @@ export default {
     },
     computed: {
         ...mapState(['userId']),
+        total:function(){
+            return this.totalPrice+this.freight-this.discount
+        },
         totalPrice:function(){
             let all = 0;
             for(let item of this.goodsList){
@@ -185,12 +137,6 @@ export default {
             }
             return all
         },
-        all:function(){
-            let a = this.goodsList.every((item)=>{
-                return item.checked == 1
-            })
-            return a
-        }
     },
     mounted(){
         this.init()
@@ -203,7 +149,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="less">
-#ShoppingCar{
+#Order{
     
     .status{
         background: #f0f0f0;
@@ -230,7 +176,7 @@ export default {
                 height: 40px;
                 line-height: 40px;
                 span{
-                    width: 380px;
+                    width: 400px;
                     text-align: center;
                     display: inline-block;
                     & + span{
@@ -246,7 +192,7 @@ export default {
                     align-items: center;
                     .item-box{
                         line-height: 40px;
-                        width: 380px;
+                        width: 400px;
                         text-align: center;
                         box-sizing: border-box;
                         & + .item-box{
@@ -286,42 +232,34 @@ export default {
                     }
                 }
             }
+            .settlement{
+                flex-direction:row-reverse;
+                p{
+                    font-size: 16px;
+                    line-height: 16px;
+                }
+                .describe{
+                    width: 80px;
+                    color: #a1a1a1
+                }
+                .money{
+
+                    p:last-child{
+                        color: #d1434a
+                    }
+                }
+            }
             .all{
                 height: 40px;
-                border: 1px solid #dbd9db;
                 margin-bottom: 100px;
+                justify-content: space-between;
                 .right{
                     width: 100px;
                     background-color: #d1434a;
                     color: #fff;
                     line-height: 40px;
                     text-align: center;
-                }
-                .left{
-                    flex:1;
-                    justify-content: space-between;
-                    align-items: center;
-                    .select{
-                        padding-left: 20px;
-                        .circle{
-                            width: 20px;
-                            height: 20px;
-                            margin-right: 30px;
-                            border: 1px solid #dbd9db;
-                            border-radius: 50%;
-                            cursor: pointer;
-                            img{
-                                width: 100%;
-                                height: 100%;
-                            }
-                        }
-                    }
-                    .price{
-                        padding-right: 20px;
-                        span{
-                            color: #d1434a
-                        }
-                    }
+                    cursor: pointer;
                 }
             }
         }

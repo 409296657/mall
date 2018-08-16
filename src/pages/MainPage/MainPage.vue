@@ -24,7 +24,7 @@
     <div class="content">
         <div class="condition container">
             <p>
-                排序：<span>默认</span><span @click="sorting">价格</span><span class="sort" :class="{active:!isUp}">↑</span>
+                排序：<span>默认</span><span class="price" @click="sorting">价格</span><span class="sort" :class="{active:!isUp}">↑</span>
             </p>
         </div>
 
@@ -152,12 +152,11 @@ export default {
                     }
                 })
                 .then((res)=>{
-                    console.log(res)
                     this.shoppingCar(this.userId)
                     this.car = 1;
                 })
                 .catch((err)=>{
-                    console.log(err)
+                    
                 })
             }else{
                 alert('请登陆后操作')
@@ -181,7 +180,7 @@ export default {
                 this.isLoading = false;
             })
             .catch((err)=>{
-                console.log(err)
+
             })
         }
     },
@@ -246,20 +245,6 @@ export default {
             }
         }
     }
-    .headbar{
-        background-color: #fff;
-        .container{
-            height: 140px;
-            align-items: center;
-            justify-content: space-between;
-            span{
-                cursor: pointer;
-                &:hover{
-                    color: red;
-                }
-            }
-        }
-    }
     .status{
         background: #f0f0f0;
         line-height: 90px;
@@ -282,6 +267,12 @@ export default {
                 text-align: right;
                 span{
                     margin-left: 20px;
+                }
+                .price{
+                    cursor: pointer;
+                    &:hover{
+                        color: #ee7a23
+                    }
                 }
                 .sort{
                     margin:0 10px;
